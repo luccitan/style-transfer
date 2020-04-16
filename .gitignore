@@ -1,0 +1,14 @@
+# Cache
+__pycache__
+.cache
+.idea
+*.pyc
+
+# macOS
+.DS_store
+
+# Placeholders folders
+images/*
+!images/.gitkeep
+results/*
+!results/.gitkeep

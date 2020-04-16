@@ -1,0 +1,56 @@
+[MASTER]
+# Use multiple processes to speed up Pylint.
+jobs=4
+
+# Pickle collected data for later comparisons.
+persistent=yes
+
+# List of plugins (as comma separated values of python modules names) to load,
+# usually to register additional checkers.
+# load-plugins=
+
+[MESSAGES CONTROL]
+
+# Disable explanations:
+#  logging-format-interpolation: f-strings are prettier, more dense and equivalent to %-format
+#  arguments-differ: allow addition of optional parameters to abstract methods
+#  missing-function-docstring: no need to document every function
+#  too-few-public-methods: why?
+
+disable=logging-format-interpolation,arguments-differ,missing-function-docstring,too-few-public-methods
+
+[TYPECHECK]
+
+# List of members which are set dynamically and missed by Pylint inference
+# Especially `torch` brings several issues around linting. It doesn't recognize callables such as `torch.tensor`
+generated-members=numpy.*,torch.*
+
+[DESIGN]
+
+# Maximum number of arguments for function / method
+max-args=10
+
+[FORMAT]
+
+# Maximum number of characters on a single line.
+max-line-length=120
+
+# Maximum number of lines in a module
+max-module-lines=500
+
+# String used as indentation unit. This is usually " " (4 spaces) or "\t" (1 tab).
+indent-string='  '
+
+# Number of spaces of indent required inside a hanging or continued line.
+indent-after-paren=2
+
+# Expected format of line ending, e.g. empty (any line ending), LF or CRLF.
+expected-line-ending-format=LF
+
+[BASIC]
+
+# Good variable names which should always be accepted, separated by a comma
+good-names=x,y,i,j,k,ex,_
+
+# Bad variable names which should always be refused, separated by a comma
+bad-names=foo,bar,baz,toto,tutu,tata,data,qwe,aze
