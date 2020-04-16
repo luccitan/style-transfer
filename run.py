@@ -34,12 +34,14 @@ def load_image(path):
   image = Utils.IMAGE_TRANSFORMER(image).unsqueeze(0) # adding a fake batch dimension of size 1
   return image.to(Utils.DEVICE, torch.float)
 
-def show_image(image, title=''):
+def show_image(image, title='', save_path=None):
   plt.figure()
   image = image.cpu().clone().squeeze(0)
   image = Utils.IMAGE_UNLOADER(image)
   plt.imshow(image)
   plt.title(title)
+  if save_path is not None:
+    plt.savefig(save_path)
   plt.pause(0.001)
 
 def run_style_transfer(input_image, content_image, style_image, epochs=None, content_weight=1, style_weight=1):
@@ -79,7 +81,6 @@ def run_style_transfer(input_image, content_image, style_image, epochs=None, con
   LOGGER.debug('Ended the optimization loop')
 
   input_image.data.clamp_(0, 1) # last out-of-the-loop boundary correction
-
   return input_image
 
 def main():
@@ -97,11 +98,11 @@ def main():
                       metavar='CONTENT_IMAGE',
                       required=True,
                       help='Path to image which content will be extracted')
-  parser.add_argument('--output_image', '-o',
+  parser.add_argument('--output_folder', '-of',
                       type=filepath,
                       metavar='OUTPUT_PATH',
                       required=True,
-                      help='Path where the output image will be stored')
+                      help='Folder path where the output image will be stored')
   parser.add_argument('--epochs', '-e',
                       type=int,
                       metavar='N_EPOCHS',
@@ -140,10 +141,11 @@ def main():
                                    style_weight=args.style_weight)
   LOGGER.info('Ended the Style Transfer')
 
-  show_image(input_image, 'Input image')
-  show_image(content_image, 'Content image')
-  show_image(style_image, 'Style image')
-  show_image(final_image, 'Final image')
+  os.makedirs(args.output_folder, exist_ok=True)
+  show_image(input_image, 'Input image', save_path=os.path.join(args.output_folder, 'input_image'))
+  show_image(content_image, 'Content image', save_path=os.path.join(args.output_folder, 'content_image'))
+  show_image(style_image, 'Style image', save_path=os.path.join(args.output_folder, 'style_image'))
+  show_image(final_image, 'Final image', save_path=os.path.join(args.output_folder, 'final_image'))
 
 if __name__ == '__main__':
   main()
