@@ -19,9 +19,11 @@ class Processing:
     transforms.Resize(Utils.IMAGE_SIZE),
     transforms.ToTensor(),
     transforms.Normalize(mean=NORMALIZATION_MEAN, std=NORMALIZATION_STD),
+    transforms.Lambda(lambda x: x.mul_(255)),
   ])
 
   postprocessor = transforms.Compose([
+    transforms.Lambda(lambda x: x.div_(255)),
     transforms.Normalize(mean=-NORMALIZATION_MEAN / NORMALIZATION_STD, std=1 / NORMALIZATION_STD),
     transforms.Lambda(lambda x: x.data.clamp_(0, 1)),
     transforms.ToPILImage()
