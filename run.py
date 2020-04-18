@@ -47,8 +47,8 @@ def run_style_transfer(final_image, content_image, style_image, epochs=1):
   LOGGER.info(f"Loading the model and the losses")
   model = VGG().to(Utils.DEVICE)
   optimizer = optim.LBFGS([final_image.requires_grad_()])
-  style_fns = {layer: StyleLoss(out).to(Utils.DEVICE) for layer, out in model(style_image, list(Utils.STYLE_LAYERS.keys())).items()}
-  content_fns = {layer: ContentLoss(out).to(Utils.DEVICE) for layer, out in model(content_image, list(Utils.CONTENT_LAYERS.keys())).items()}
+  style_fns = {layer: StyleLoss(out) for layer, out in model(style_image, list(Utils.STYLE_LAYERS.keys())).items()}
+  content_fns = {layer: ContentLoss(out) for layer, out in model(content_image, list(Utils.CONTENT_LAYERS.keys())).items()}
   LOGGER.debug(f"Loaded the model and the losses")
 
   i = 0
@@ -58,7 +58,7 @@ def run_style_transfer(final_image, content_image, style_image, epochs=1):
     optimizer.zero_grad()
     outs = model(final_image, [*Utils.STYLE_LAYERS, *Utils.CONTENT_LAYERS])
 
-    style_loss = sum([weight * style_fns[layer](outs[layer]) for layer, weight in Utils.STYLE_LAYERS.items()])
+    style_loss = sum([style_fns[layer](outs[layer]) for layer, weight in Utils.STYLE_LAYERS.items()])
     content_loss = sum([weight * content_fns[layer](outs[layer]) for layer, weight in Utils.CONTENT_LAYERS.items()])
     loss = style_loss + content_loss
     loss.backward()

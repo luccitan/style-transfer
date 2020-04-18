@@ -24,27 +24,23 @@ def gram_matrix(input_tensor):
   # Normalizing the gram matrix otherwise inputs with biggest dimensions would have higher values
   return gram.div(batch_size * feature_maps * height * width)
 
-class ContentLoss(nn.Module):
+def ContentLoss(target):
   """Loss to compare the content of input and content image.
   Mean-squared error over associated layer features
   """
+  target = target.detach()
+  def loss(tensor):
+    return F.mse_loss(tensor, target)
 
-  def __init__(self, target):
-    super().__init__()
-    self.target = target.detach()
+  return loss
 
-  def forward(self, tensor):
-    return F.mse_loss(tensor, self.target) # pylint: disable=attribute-defined-outside-init
-
-class StyleLoss(nn.Module):
+def StyleLoss(target):
   """Loss to compare the style of input and style image.
   Mean-squared error over Gram matrix of associated layer features
   """
-
-  def __init__(self, target):
-    super().__init__()
-    self.target = gram_matrix(target).detach()
-
-  def forward(self, tensor):
+  target = gram_matrix(target).detach()
+  def loss(tensor):
     gram = gram_matrix(tensor)
-    return F.mse_loss(gram, self.target) # pylint: disable=attribute-defined-outside-init
+    return F.mse_loss(gram, target)
+
+  return loss
