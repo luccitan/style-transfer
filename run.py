@@ -42,11 +42,11 @@ def show_image(image, title='', save_path=None):
     plt.savefig(save_path)
   plt.pause(0.001)
 
-def run_style_transfer(input_image, content_image, style_image, epochs=1):
+def run_style_transfer(final_image, content_image, style_image, epochs=1):
   """ TODO """
   LOGGER.info(f"Loading the model and the losses")
-  model = VGG()
-  optimizer = optim.LBFGS([input_image.requires_grad_()])
+  model = VGG().to(Utils.DEVICE)
+  optimizer = optim.LBFGS([final_image.requires_grad_()])
   style_fns = {layer: StyleLoss(out).to(Utils.DEVICE) for layer, out in model(style_image, list(Utils.STYLE_LAYERS.keys())).items()}
   content_fns = {layer: ContentLoss(out).to(Utils.DEVICE) for layer, out in model(content_image, list(Utils.CONTENT_LAYERS.keys())).items()}
   LOGGER.debug(f"Loaded the model and the losses")
@@ -54,30 +54,27 @@ def run_style_transfer(input_image, content_image, style_image, epochs=1):
   i = 0
   progress_bar = tqdm.tqdm(total=epochs, desc='CL ? / SL ?', leave=True)
   def closure():
-    input_image.data.clamp_(0, 1) # image data may be updated with values outside 0 and 1 (boundaries)
+    final_image.data.clamp_(0, 1) # image data may be updated with values outside 0 and 1 (boundaries)
     optimizer.zero_grad()
-    outs = model(input_image, [*Utils.STYLE_LAYERS, *Utils.CONTENT_LAYERS])
+    outs = model(final_image, [*Utils.STYLE_LAYERS, *Utils.CONTENT_LAYERS])
 
     style_loss = sum([weight * style_fns[layer](outs[layer]) for layer, weight in Utils.STYLE_LAYERS.items()])
     content_loss = sum([weight * content_fns[layer](outs[layer]) for layer, weight in Utils.CONTENT_LAYERS.items()])
     loss = style_loss + content_loss
     loss.backward()
-
-    progress_bar.update(1)
     progress_bar.set_description(f"CL {content_loss.item():3f} / SL {style_loss.item():4f}")
     progress_bar.refresh()
-    time.sleep(0.001)
     return loss
 
   LOGGER.info('Starting the optimization loop')
   while i < epochs:
     optimizer.step(closure)
+    progress_bar.update(1)
+    progress_bar.refresh()
     i += 1
   progress_bar.close()
   LOGGER.debug('Ended the optimization loop')
-
-  input_image.data.clamp_(0, 1) # last out-of-the-loop boundary correction
-  return input_image
+  final_image.data.clamp_(0, 1) # last out-of-the-loop boundary correction
 
 def main():
   filepath = lambda p: os.path.abspath(os.path.realpath(os.path.expanduser(p)))
@@ -120,8 +117,9 @@ def main():
     LOGGER.debug('Preparing input image as the content image')
     input_image = content_image.clone()
 
+  final_image = input_image.clone()
   LOGGER.info('Starting the Style Transfer')
-  final_image = run_style_transfer(input_image, content_image, style_image, epochs=args.epochs)
+  run_style_transfer(final_image, content_image, style_image, epochs=args.epochs)
   LOGGER.info('Ended the Style Transfer')
 
   os.makedirs(args.output_folder, exist_ok=True)

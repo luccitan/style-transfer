@@ -14,7 +14,7 @@ class Utils:
 
   # Losses layers
   CONTENT_LAYERS = {'conv4_2': 1e0}
-  STYLE_LAYERS = {f"conv{i + 1}_1": 1e3 / (n ** 2) for i, n in enumerate([64, 128, 256, 512, 512])}
+  STYLE_LAYERS = {f"conv{i + 1}_1": 5e3 for i in range(5)}
 
   IMAGE_SIZE = 512 if torch.cuda.is_available() else 256
   DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
