@@ -46,7 +46,7 @@ def run_style_transfer(final_image, content_image, style_image, epochs=1):
   """ TODO """
   LOGGER.info(f"Loading the model and the losses")
   model = VGG().to(Utils.DEVICE)
-  optimizer = optim.LBFGS([final_image.requires_grad_()])
+  optimizer = optim.Adam([final_image.requires_grad_()], lr=1e-4)
   style_fns = {layer: StyleLoss(out) for layer, out in model(style_image, list(Utils.STYLE_LAYERS.keys())).items()}
   content_fns = {layer: ContentLoss(out) for layer, out in model(content_image, list(Utils.CONTENT_LAYERS.keys())).items()}
   LOGGER.debug(f"Loaded the model and the losses")
