@@ -6,8 +6,10 @@ They are :
   - image input normalizations layers
   - losses layers applied automatically after each convulution layers
 
-These layers are taken from this tutorial:
-  https://pytorch.org/tutorials/advanced/neural_style_tutorial.html
+Implementation of :
+  https://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Gatys_Image_Style_Transfer_CVPR_2016_paper.pdf
+Code taken, rewritten and adapted from this source:
+  https://github.com/leongatys/PytorchNeuralStyleTransfer
 """
 
 import torch

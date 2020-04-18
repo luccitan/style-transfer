@@ -7,8 +7,10 @@ Main script to run Style Transfer.
       better and better
   4. Output / save / plots the original and final images
 
-Code taken, rewritten and adapted from this tutorial:
-  https://pytorch.org/tutorials/advanced/neural_style_tutorial.html
+Implementation of :
+  https://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Gatys_Image_Style_Transfer_CVPR_2016_paper.pdf
+Code taken, rewritten and adapted from this source:
+  https://github.com/leongatys/PytorchNeuralStyleTransfer
 """
 
 import os
@@ -56,8 +58,6 @@ def run_style_transfer(input_image, content_image, style_image, epochs=1):
     optimizer.zero_grad()
     outs = model(input_image, [*Utils.STYLE_LAYERS, *Utils.CONTENT_LAYERS])
 
-    n_styles = len(Utils.STYLE_LAYERS)
-    n_contents = len(Utils.CONTENT_LAYERS)
     style_loss = sum([weight * style_fns[layer](outs[layer]) for layer, weight in Utils.STYLE_LAYERS.items()])
     content_loss = sum([weight * content_fns[layer](outs[layer]) for layer, weight in Utils.CONTENT_LAYERS.items()])
     loss = style_loss + content_loss
