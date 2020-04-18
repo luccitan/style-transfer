@@ -2,7 +2,6 @@
 """Utilitary file containing constants, configurations, predefined parameters"""
 
 import torch
-import torchvision.transforms as transforms
 
 class Utils:
   """ TODO """
@@ -10,22 +9,15 @@ class Utils:
   PROJECT = 'style_transfer'
 
   # Hyperparameters and model predefined constants
-  EPOCHS = 300
-  NORMALIZATION_MEAN = (0.485, 0.456, 0.406)
-  NORMALIZATION_STD = (0.229, 0.224, 0.225)
-  CONTENT_WEIGHT = 1
-  CONTENT_LAYERS = ['conv_4']
-  STYLE_WEIGHT = 1000000
-  STYLE_LAYERS = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
+  VGG_NORMALIZATION_MEAN = [0.485, 0.456, 0.406]
+  VGG_NORMALIZATION_STD = [0.229, 0.224, 0.225]
+
+  # Losses layers
+  CONTENT_LAYERS = {'conv4_2': 1e0}
+  STYLE_LAYERS = {f"conv{i + 1}_1": 1e3 / (n ** 2) for i, n in enumerate([64, 128, 256, 512, 512])}
+
   IMAGE_SIZE = 512 if torch.cuda.is_available() else 256
   DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-  # Torch image transformers
-  IMAGE_UNLOADER = transforms.ToPILImage()
-  IMAGE_TRANSFORMER = transforms.Compose([
-    transforms.Resize(IMAGE_SIZE), # dynamic size depending on device used
-    transforms.ToTensor()
-  ])
 
   LOGGING_CONFIG = {
     'version': 1,
