@@ -56,7 +56,7 @@ def run_style_transfer(final_image, content_image, style_image, epochs=1):
     optimizer.zero_grad()
     outs = model(final_image, [*Utils.STYLE_LAYERS, *Utils.CONTENT_LAYERS])
 
-    style_loss = sum([style_fns[layer](outs[layer]) for layer, weight in Utils.STYLE_LAYERS.items()])
+    style_loss = sum([weight * style_fns[layer](outs[layer]) for layer, weight in Utils.STYLE_LAYERS.items()])
     content_loss = sum([weight * content_fns[layer](outs[layer]) for layer, weight in Utils.CONTENT_LAYERS.items()])
     loss = style_loss + content_loss
     loss.backward()
