@@ -14,10 +14,10 @@ Code taken, rewritten and adapted from this source:
 """
 
 import os
-import time
 import argparse
 import logging
 import logging.config
+from PIL import Image
 
 import tqdm
 import torch
@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 
 from model import VGG
 from utils import Utils
-from losses import ContentLoss, StyleLoss
+from losses import get_content_loss, get_style_loss
 from processing import Processing
 
 logging.config.dictConfig(Utils.LOGGING_CONFIG)
@@ -34,7 +34,6 @@ LOGGER = logging.getLogger(Utils.PROJECT)
 
 def show_image(image, title='', save_path=None):
   plt.figure()
-  image = image.cpu().clone().squeeze(0)
   image = Processing.postprocessor(image)
   plt.imshow(image)
   plt.title(title)
@@ -46,9 +45,9 @@ def run_style_transfer(final_image, content_image, style_image, epochs=1):
   """ TODO """
   LOGGER.info(f"Loading the model and the losses")
   model = VGG().to(Utils.DEVICE)
-  optimizer = optim.Adam([final_image.requires_grad_()], lr=1e-4)
-  style_fns = {layer: StyleLoss(out) for layer, out in model(style_image, list(Utils.STYLE_LAYERS.keys())).items()}
-  content_fns = {layer: ContentLoss(out) for layer, out in model(content_image, list(Utils.CONTENT_LAYERS.keys())).items()}
+  optimizer = optim.LBFGS([final_image.requires_grad_()])
+  style_fns = {layer: get_style_loss(out) for layer, out in model(style_image, list(Utils.STYLE_LAYERS.keys())).items()}
+  content_fns = {layer: get_content_loss(out) for layer, out in model(content_image, list(Utils.CONTENT_LAYERS.keys())).items()}
   LOGGER.debug(f"Loaded the model and the losses")
 
   i = 0
@@ -106,8 +105,10 @@ def main():
                       help='If set to True, initial image is white noise and not the content image')
   args = parser.parse_args()
 
-  style_image = Processing.load_image(args.style_image)
-  content_image = Processing.load_image(args.content_image)
+  style_image = Image.open(args.style_image).convert('RGB')
+  style_image = Processing.preprocessor(style_image)
+  content_image = Image.open(args.style_image).convert('RGB')
+  content_image = Processing.preprocessor(content_image)
   assert style_image.size() == content_image.size(), "Style and content images must be the same sizes"
 
   if args.white_noise:

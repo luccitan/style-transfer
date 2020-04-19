@@ -13,7 +13,6 @@ Code taken, rewritten and adapted from this source:
 """
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 
 def gram_matrix(input_tensor):
@@ -24,7 +23,7 @@ def gram_matrix(input_tensor):
   # Normalizing the gram matrix otherwise inputs with biggest dimensions would have higher values
   return gram.div(batch_size * feature_maps * height * width)
 
-def ContentLoss(target):
+def get_content_loss(target):
   """Loss to compare the content of input and content image.
   Mean-squared error over associated layer features
   """
@@ -34,7 +33,7 @@ def ContentLoss(target):
 
   return loss
 
-def StyleLoss(target):
+def get_style_loss(target):
   """Loss to compare the style of input and style image.
   Mean-squared error over Gram matrix of associated layer features
   """

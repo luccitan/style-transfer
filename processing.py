@@ -1,36 +1,32 @@
 # coding: utf-8
 # pylint: disable=missing-module-docstring
 
-from PIL import Image
-
 import torch
 import torchvision.transforms as transforms
+import numpy as np
 
 from utils import Utils
 
-NORMALIZATION_MEAN = torch.tensor(Utils.VGG_NORMALIZATION_MEAN).to(Utils.DEVICE)
-NORMALIZATION_STD = torch.tensor(Utils.VGG_NORMALIZATION_STD).to(Utils.DEVICE)
+PRE_TRANSFORMER = transforms.Compose([
+  transforms.Resize(Utils.IMAGE_SIZE),
+  transforms.ToTensor(),
+  transforms.Normalize(
+    mean=torch.tensor(Utils.VGG_NORMALIZATION_MEAN).to(Utils.DEVICE),
+    std=torch.tensor(Utils.VGG_NORMALIZATION_STD).to(Utils.DEVICE))
+])
 
 class Processing:
   """Image processing (un)loading utils and functions"""
 
-
-  preprocessor = transforms.Compose([
-    transforms.Resize(Utils.IMAGE_SIZE),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=NORMALIZATION_MEAN, std=NORMALIZATION_STD),
-    transforms.Lambda(lambda x: x.mul_(255)),
-  ])
-
-  postprocessor = transforms.Compose([
-    transforms.Lambda(lambda x: x.div_(255)),
-    transforms.Normalize(mean=-NORMALIZATION_MEAN / NORMALIZATION_STD, std=1 / NORMALIZATION_STD),
-    transforms.Lambda(lambda x: x.data.clamp_(0, 1)),
-    transforms.ToPILImage()
-  ])
+  @staticmethod
+  def preprocessor(image):
+    return PRE_TRANSFORMER(image).unsqueeze(0).to(Utils.DEVICE, torch.float)
 
   @staticmethod
-  def load_image(path):
-    image = Image.open(path)
-    image = Processing.preprocessor(image).unsqueeze(0).to(Utils.DEVICE, torch.float)
+  def postprocessor(tensor):
+    image = tensor.to('cpu').clone().detach()
+    image = image.numpy().squeeze().transpose(1, 2, 0)
+    # Transposed to H, W, C so that we can denormalize and plot with Matplotlib
+    image = image * np.array(Utils.VGG_NORMALIZATION_STD) + np.array(Utils.VGG_NORMALIZATION_MEAN)
+    image = image.clip(0, 1)
     return image
