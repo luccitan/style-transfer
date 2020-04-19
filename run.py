@@ -53,7 +53,6 @@ def run_style_transfer(final_image, content_image, style_image, epochs=1):
   i = 0
   progress_bar = tqdm.tqdm(total=epochs, desc='CL ? / SL ?', leave=True)
   def closure():
-    final_image.data.clamp_(0, 1) # image data may be updated with values outside 0 and 1 (boundaries)
     optimizer.zero_grad()
     outs = model(final_image, [*Utils.STYLE_LAYERS, *Utils.CONTENT_LAYERS])
 
@@ -73,7 +72,6 @@ def run_style_transfer(final_image, content_image, style_image, epochs=1):
     i += 1
   progress_bar.close()
   LOGGER.debug('Ended the optimization loop')
-  final_image.data.clamp_(0, 1) # last out-of-the-loop boundary correction
 
 def main():
   filepath = lambda p: os.path.abspath(os.path.realpath(os.path.expanduser(p)))
