@@ -105,7 +105,7 @@ def main():
 
   style_image = Image.open(args.style_image).convert('RGB')
   style_image = Processing.preprocessor(style_image)
-  content_image = Image.open(args.style_image).convert('RGB')
+  content_image = Image.open(args.content_image).convert('RGB')
   content_image = Processing.preprocessor(content_image)
   assert style_image.size() == content_image.size(), "Style and content images must be the same sizes"
 
